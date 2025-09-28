@@ -9,7 +9,7 @@ const jwt = require('jsonwebtoken')
 
 const {run_code} = require('./util/run_code')
 const {authClassroom, authClassroomTeacher} = require('./middlewares/auth')
-const {getClass, getClasses, addSubmissionToClass, createClass, openClass} = require('./classrooms')
+const {getClass, getClasses, deleteClass, addSubmissionToClass, createClass, openClass, addMemberToClass} = require('./classrooms')
 
 const app = express();
 const PORT = 3000;
@@ -21,6 +21,7 @@ app.use(cors({
 app.use(express.json())
 
 
+const JWT_SECRET = process.env.JWT_SECRET
 
 
 
@@ -31,28 +32,30 @@ app.post('/api/class/create/:password', async (req, res) => {
     // let token = jwt.sign({password: password}, JWT_SECRET)
     // let token = await bcrypt.hash(password, 12)
     let characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-    let token = ''
-    for(let i = 0; i < 16; i++){
-        token += characters.charAt(Math.random() * characters.length)
-    }
+    // let token = ''
+    // for(let i = 0; i < 16; i++){
+    //     token += characters.charAt(Math.random() * characters.length)
+    // }
+    let token = jwt.sign({password: password}, JWT_SECRET)
     createClass(password, token)
     res.status(200).json({token})
 })
 
 app.post('/api/class/join/:password', async (req, res) => {
     const {password} = req.params
-    // let token = jwt.sign({password: password}, JWT_SECRET)
-    res.status(200).json({success: true})
+    let token = jwt.sign({password: password}, JWT_SECRET)
+    addMemberToClass(password, token)
+    res.status(200).json({token: token})
 })
 
 
 
 app.get('/api/class/submission', authClassroom, async (req, res) => {
-    res.status(200).json(getClass(req.password))
+    res.status(200).json(getClass(req.password).submissions)
 })
 
 
-app.post('/api/code/:lang',  authClassroom, upload.single('file'), async (req, res) => {
+app.post('/api/code/:lang', authClassroom, upload.single('file'), async (req, res) => {
 
     const code = req.file.buffer.toString('utf-8')
     const {lang} = req.params
@@ -70,8 +73,19 @@ app.post('/api/code/:lang',  authClassroom, upload.single('file'), async (req, r
 })
 
 app.patch('/api/class/close', authClassroomTeacher, (req, res) => {
-    console.log(req.password)
+    console.log('finalizar envios', req.password)
     openClass(req.password, false)
+    res.status(200).json(getClass(req.password).submissions)
+})
+
+app.post('/api/class/exit', authClassroom, (req, res) => {
+
+    res.status(200).json({msg: 'saiu'})
+})
+
+app.delete('/api/class', authClassroomTeacher, (req, res) => {
+    deleteClass(req.password)
+    res.status(200).json({msg: 'deletou'})
 })
 
 app.get('/api/update', authClassroom, (req, res) => {

@@ -2,8 +2,8 @@ let classrooms = new Map()
 
 
 
-function getClass(token){
-    return classrooms.get(token)
+function getClass(password){
+    return classrooms.get(password)
 }
 
 function getClasses(){
@@ -11,19 +11,31 @@ function getClasses(){
     return classrooms
 }
 
-function createClass(token, tokenteacher){
-    classrooms.set(token, {submissions: [], open: true, tokenteacher})
+function createClass(password, tokenteacher){
+    classrooms.set(password, {submissions: [], members_tokens: [], open: true, tokenteacher})
 }
-function addSubmissionToClass(token, submission){
-    classroom = classrooms.get(token)
+
+function deleteClass(password){
+    classrooms.delete(password)
+}
+
+function addSubmissionToClass(password, submission){
+    classroom = classrooms.get(password)
     console.log(classroom)
     classroom.submissions.push(submission)
     return true
 }
-function openClass(token, value){
-    classrooms.get(token).open = value
+function openClass(password, value){
+    classrooms.get(password).open = value
 }
 
+function addMemberToClass(password, membertoken){
+    classroom = classrooms.get(password)
+    classroom.members_tokens.push(membertoken)
+    return true
+}
+
+
 module.exports = {
-    getClass, getClasses, addSubmissionToClass, createClass, openClass
+    getClass, getClasses, addSubmissionToClass, createClass, deleteClass, openClass, addMemberToClass
 }
