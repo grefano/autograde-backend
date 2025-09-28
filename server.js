@@ -9,7 +9,7 @@ const jwt = require('jsonwebtoken')
 
 const {run_code} = require('./util/run_code')
 const {authClassroom, authClassroomTeacher} = require('./middlewares/auth')
-const {getClass, getClasses, deleteClass, addSubmissionToClass, createClass, openClass, addMemberToClass} = require('./classrooms')
+const {getClass, getClasses, deleteClass, addSubmissionToClass, createClass, openClass, addMemberToClass, removeMemberFromClass} = require('./classrooms')
 
 const app = express();
 const PORT = 3000;
@@ -39,23 +39,34 @@ app.post('/api/class/create/:password', async (req, res) => {
     let token = jwt.sign({password: password}, JWT_SECRET)
     createClass(password, token)
     res.status(200).json({token})
-})
+})  
 
-app.post('/api/class/join/:password', async (req, res) => {
-    const {password} = req.params
-    let token = jwt.sign({password: password}, JWT_SECRET)
+app.post('/api/class/join/:password/:name', async (req, res) => {
+    const {password, name} = req.params
+    let token = jwt.sign({password, name}, JWT_SECRET)
     addMemberToClass(password, token)
     res.status(200).json({token: token})
 })
 
 
 
-app.get('/api/class/submission', authClassroom, async (req, res) => {
-    res.status(200).json(getClass(req.password).submissions)
+app.get('/api/class', authClassroom, async (req, res) => {
+    let classroom = getClass(req.password)
+    let members_names = classroom.members_tokens.map(membertoken => {
+        let verify = jwt.verify(membertoken, JWT_SECRET)
+        console.log(`verify ${JSON.stringify(verify)}`)
+        return verify.name
+        // verify.password
+    });
+    res.status(200).json({submissions: classroom.submissions, members: members_names})
 })
 
 
 app.post('/api/code/:lang', authClassroom, upload.single('file'), async (req, res) => {
+
+    if (!getClass(req.password).open){
+        return res.status(500).json({msg: 'sala está fechada'})
+    }
 
     const code = req.file.buffer.toString('utf-8')
     const {lang} = req.params
@@ -79,7 +90,7 @@ app.patch('/api/class/close', authClassroomTeacher, (req, res) => {
 })
 
 app.post('/api/class/exit', authClassroom, (req, res) => {
-
+    removeMemberFromClass(req.password, req.token)
     res.status(200).json({msg: 'saiu'})
 })
 

@@ -30,12 +30,18 @@ function openClass(password, value){
 }
 
 function addMemberToClass(password, membertoken){
-    classroom = classrooms.get(password)
+    let classroom = classrooms.get(password)
     classroom.members_tokens.push(membertoken)
+    return true
+}
+
+function removeMemberFromClass(password, membertoken){
+    let classroom = classrooms.get(password)
+    classroom.members_tokens = classroom.members_tokens.filter(token => token != membertoken)
     return true
 }
 
 
 module.exports = {
-    getClass, getClasses, addSubmissionToClass, createClass, deleteClass, openClass, addMemberToClass
+    getClass, getClasses, addSubmissionToClass, createClass, deleteClass, openClass, addMemberToClass, removeMemberFromClass
 }
