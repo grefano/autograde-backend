@@ -44,8 +44,12 @@ app.post('/api/class/create/:password', async (req, res) => {
 app.post('/api/class/join/:password/:name', async (req, res) => {
     const {password, name} = req.params
     let token = jwt.sign({password, name}, JWT_SECRET)
-    addMemberToClass(password, token)
-    res.status(200).json({token: token})
+    let entrou = addMemberToClass(password, token)
+    if (entrou){
+        res.status(200).json({token: token})
+    } else {
+        res.status(404).json({msg: 'sala não existe'})
+    }
 })
 
 

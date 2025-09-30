@@ -31,8 +31,12 @@ function openClass(password, value){
 
 function addMemberToClass(password, membertoken){
     let classroom = classrooms.get(password)
-    classroom.members_tokens.push(membertoken)
-    return true
+    if (classroom){
+        classroom.members_tokens.push(membertoken)
+        return true
+    } else {
+        return false
+    }
 }
 
 function removeMemberFromClass(password, membertoken){
