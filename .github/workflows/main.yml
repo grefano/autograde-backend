@@ -1,0 +1,20 @@
+name: keep-alive
+on: 
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+  
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ping
+        run: |
+          echo "Pinging server"
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://server-lerdos.onrender.com/keep-alive)
+
+          if [ $response -eq 200 ]; then
+            echo "server is alive"
+          else
+            echo "server might be down $response"
+          fi
