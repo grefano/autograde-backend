@@ -108,7 +108,9 @@ app.get('/debug/classrooms', (req, res) => {
     res.status(200).json(Object.fromEntries(getClasses()))
 })
 
-
+app.get('/keep-alive', (req, res) => {
+    res.status(200).json({msg: 'ta vivo'})
+})
 
 app.listen(PORT, () => {
   console.log(`API rodando em http://localhost:${PORT}`);
