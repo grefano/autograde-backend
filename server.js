@@ -29,13 +29,6 @@ const JWT_SECRET = process.env.JWT_SECRET
 app.post('/api/class/create/:password', async (req, res) => {
     const {password} = req.params
     console.log('create', password)
-    // let token = jwt.sign({password: password}, JWT_SECRET)
-    // let token = await bcrypt.hash(password, 12)
-    let characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-    // let token = ''
-    // for(let i = 0; i < 16; i++){
-    //     token += characters.charAt(Math.random() * characters.length)
-    // }
     let token = jwt.sign({password: password}, JWT_SECRET)
     createClass(password, token)
     res.status(200).json({token})
@@ -56,13 +49,23 @@ app.post('/api/class/join/:password/:name', async (req, res) => {
 
 app.get('/api/class', authClassroom, async (req, res) => {
     let classroom = getClass(req.password)
-    let members_names = classroom.members_tokens.map(membertoken => {
+    let count_names = {}
+    let members = {}
+    classroom.members_tokens.forEach(membertoken => {
         let verify = jwt.verify(membertoken, JWT_SECRET)
+        let name = verify.name
         console.log(`verify ${JSON.stringify(verify)}`)
-        return verify.name
-        // verify.password
+        if (count_names[name]){
+            count_names[name]++
+        } else {
+            count_names[name] = 1
+        }
+        members[membertoken] = count_names[name] > 1 ? `${name} ${count_names[name]}` : name  
     });
-    res.status(200).json({submissions: classroom.submissions, members: members_names})
+    let submissions = classroom.submissions.map(submission => {
+        return {...submission, owner: members[submission.owner]}
+    })
+    res.status(200).json({submissions, members: Object.values(members)})
 })
 
 
@@ -78,7 +81,7 @@ app.post('/api/code/:lang', authClassroom, upload.single('file'), async (req, re
 
     result = await run_code(code, lang)
 
-    addSubmissionToClass(req.password, {lang, code})
+    addSubmissionToClass(req.password, {lang, code, owner: req.token})
 
     // submissions.push({...result, code})
     console.log(result)

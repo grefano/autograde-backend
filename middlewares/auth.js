@@ -8,22 +8,24 @@ const authClassroom = async (req, res, next) => {
     if (!authorization){
         return res.status(500).json({error: 'token da classroom não foi especificado'}) 
     }
-    console.log('authorization headers', authorization)
+    // console.log('authorization headers', authorization)
     let token = (authorization.split(' ')[1])
-    console.log(`authclassroom ${token} `)
+    // console.log(`authclassroom ${token} `)
     let tokenverify = jwt.verify(token, JWT_SECRET)
     let password = tokenverify['password']
+    let name = tokenverify['name']
     let classroom = getClass(password)
-    console.log(`verify ${JSON.stringify(tokenverify)} password ${password} classroom ${classroom}`)
+    // console.log(`verify ${JSON.stringify(tokenverify)} password ${password} classroom ${classroom}`)
 
     if (!classroom){
         return res.status(500).json({error: 'sala não existe'})
     }
-    console.log(`members ${classroom.members_tokens} includes ${token}`)
+    // console.log(`members ${classroom.members_tokens} includes ${token}`)
     if (classroom.members_tokens.includes(token) || classroom.tokenteacher == token){
         // aluno está na sala
         req.password = password
         req.token = token
+        req.name = name
         next() 
     } else {
         return res.status(500).json({error: 'usuário não está na sala'})
@@ -40,7 +42,7 @@ const authClassroomTeacher = async (req, res, next) => {
     let tokenverify = jwt.verify(token, JWT_SECRET)
     let password = tokenverify['password']
     let classroom = getClass(password)
-    console.log(`password ${password} classroom ${classroom}`)
+    // console.log(`password ${password} classroom ${classroom}`)
     if (!classroom){
         return res.status(500).json({error: 'sala não existe'})
     }
