@@ -12,7 +12,7 @@ function getClasses(){
 }
 
 function createClass(password, tokenteacher){
-    classrooms.set(password, {submissions: [], members_tokens: [], open: true, tokenteacher})
+    classrooms.set(password, {submissions: [], members_tokens: [], open: true, tokenteacher, submissions_responses: {}})
 }
 
 function deleteClass(password){
@@ -45,7 +45,31 @@ function removeMemberFromClass(password, membertoken){
     return true
 }
 
+function getResponses(membertoken){
+    let classroom = classrooms.get(password)
+    if (!classroom){
+        console.log(`classroom ${password} dont exist`)
+        return false
+    }
+    let responses = Object.values(classroom.submissions_responses).reduce((acc, cur) => {
+        if (acc.membertoken == membertoken){
+            acc.push(cur)
+        }
+    }, [])
+    return responses
+}
+
+function addResponseToClass(code, password, respondenttoken, membertoken){
+    let classroom = classrooms.get(password)
+    if (!classroom){
+        console.log(`classroom ${password} dont exist`)
+        return false
+    }
+    classroom.submissions_responses[respondenttoken] = {membertoken, code}
+    return true
+}
+
 
 module.exports = {
-    getClass, getClasses, addSubmissionToClass, createClass, deleteClass, openClass, addMemberToClass, removeMemberFromClass
+    getClass, getClasses, addSubmissionToClass, createClass, deleteClass, openClass, addMemberToClass, removeMemberFromClass, getResponses, addResponseToClass
 }
