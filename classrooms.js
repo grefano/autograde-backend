@@ -45,16 +45,18 @@ function removeMemberFromClass(password, membertoken){
     return true
 }
 
-function getResponses(membertoken){
+function getResponses(password, membertoken){
     let classroom = classrooms.get(password)
     if (!classroom){
         console.log(`classroom ${password} dont exist`)
         return false
     }
+    console.log(JSON.stringify(classroom, null, 2))
     let responses = Object.values(classroom.submissions_responses).reduce((acc, cur) => {
-        if (acc.membertoken == membertoken){
+        if (cur.membertoken == membertoken){
             acc.push(cur)
         }
+        return acc
     }, [])
     return responses
 }

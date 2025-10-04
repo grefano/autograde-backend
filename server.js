@@ -83,8 +83,9 @@ app.post('/api/code/return', authClassroomTeacher, async (req, res) => {
 })
 
 app.get('/api/code/return', authClassroom, async (req, res) => {
-
-    res.status(200).json(getResponses(req.token))
+    let responses = getResponses(req.password, req.token)
+    console.log('responses', responses)
+    res.status(200).json(responses)
 })
 
 app.post('/api/code/:lang', authClassroom, upload.single('file'), async (req, res) => {
