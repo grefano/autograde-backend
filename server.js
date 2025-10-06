@@ -65,7 +65,7 @@ app.get('/api/class', authClassroom, async (req, res) => {
     let submissions = classroom.submissions.map(submission => {
         return {...submission, owner_token: submission.owner, owner_name: members[submission.owner]}
     })
-    console.log(members)
+    console.log(submissions)
     res.status(200).json({submissions, members})
 })
 
@@ -99,8 +99,11 @@ app.post('/api/code/:lang', authClassroom, upload.single('file'), async (req, re
     console.log(lang)
 
     result = await run_code(code, lang)
+    
+    let created = Date.now()
+    // let token = created + req.token
 
-    addSubmissionToClass(req.password, {lang, code, owner: req.token})
+    addSubmissionToClass(req.password, {lang, code, owner: req.token, created})
 
     // submissions.push({...result, code})
     console.log(result)

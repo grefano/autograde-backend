@@ -71,7 +71,14 @@ function addResponseToClass(code, password, respondenttoken, membertoken){
     return true
 }
 
+function getSubmissionIDs(submission){
+    let ids = {
+        owner: submission.owner,
+        created: submission.created
+    }
+    return ids 
+}
 
 module.exports = {
-    getClass, getClasses, addSubmissionToClass, createClass, deleteClass, openClass, addMemberToClass, removeMemberFromClass, getResponses, addResponseToClass
+    getClass, getClasses, addSubmissionToClass, getSubmissionIDs, createClass, deleteClass, openClass, addMemberToClass, removeMemberFromClass, getResponses, addResponseToClass
 }
